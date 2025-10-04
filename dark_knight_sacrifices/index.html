@@ -8,13 +8,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body class="bg-black overflow-hidden">
-    <div class="scene-1 h-screen w-screen">
+    <div class="scene-1 h-screen w-screen relative flex items-center justify-center">
         <img src="assets/train-backdrop.png" class="h-full w-full">
         <img src="assets/train.png" class="absolute right-[-550px] bottom-[-87px] h-150 cover train">
+        <div class="absolute left-[42%] top-10 flex flex-row items-start" style="z-index:10;">
+          <div class="border-4 border-blue-900 bg-[#223a5e] p-1" style="box-shadow: 0 0 0 4px #3b82f6, 0 0 0 8px #0a192f;">
+            <div class="bg-[#0a192f] border-2 border-blue-400 p-2 flex flex-row items-start">
+              <!-- <div class="mr-4">
+                <div class="w-20 h-24 bg-[#3b82f6] border-2 border-blue-400"></div>
+              </div> -->
+              <div>
+                <div class="font font-white text-white text-xs leading-tight" style="font-family: 'Press Start 2P', cursive; min-width: 220px;">
+                  Hello.<br>
+                  I sell keys.<br>
+                  What<br>
+                  would you like?
+                  <span class="blink">&#9654;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
-    <div class="scene-2 h-screen w-screen" style="display:none;">
+    <div class="scene-2 h-screen w-screen hidden" style="display:none; opacity: 0;">
+        <img src="assets/prisioners.png" alt="" class="absolute top-55 left-5  h-[85%] object-cover" style="z-index:5;">
         <img src="assets/train-inside.png" class="h-full w-full">
+        <!-- batman -->
+         <div class="absolute left-[42%] top-10 flex flex-row items-start" style="z-index:10;">
+          <div class="border-4 border-blue-900 bg-[#223a5e] p-1" style="box-shadow: 0 0 0 4px #3b82f6, 0 0 0 8px #0a192f;">
+            <div class="bg-[#0a192f] border-2 border-blue-400 p-2 flex flex-row items-start">
+              <div class="mr-4">
+                <div class="w-20 h-24 bg-[#3b82f6] border-2 border-blue-400"></div>
+              </div>
+              <div>
+                <div class="font font-white text-white text-xs leading-tight" style="font-family: 'Press Start 2P', cursive; min-width: 220px;">
+                  Hello.<br>
+                  I sell keys.<br>
+                  What<br>
+                  would you like?
+                  <span class="blink">&#9654;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
+    <div class="scene-3 h-screen w-screen hidden" style="display:none; opacity: 0;">
+        <div class="flex items-center justify-center h-full">
+            <div class="text-white font text-2xl" style="font-family: 'Press Start 2P', cursive;">Scene 3</div>
+        </div>
+    </div>
+
+
     <style>
 
     .font {
@@ -27,8 +72,6 @@
     .blink {
       animation: blink 1s steps(1) infinite;
     }
-  </style>
-    <style>
         
         .train {
             animation: train 6s linear;
@@ -41,28 +84,31 @@
             animation: fadeIn 2s forwards;
         }
 
-        @keyframes fadeOut{
-            to {
-                opacity: 0;
-            }
-        }
-
         @keyframes train {
             0%{
                 right: -550px;
             }
             100%{
-                right: calc(99vw)
+                right: calc(100vw)
             }
         }
 
-        @keyframes fadeIn{
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+        @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+        }
+
+        @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
         }
     </style>
     <script src="index.js"></script>
