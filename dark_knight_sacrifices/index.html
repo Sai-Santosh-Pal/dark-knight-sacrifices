@@ -4,8 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dark Knight: Sacrifices</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
-<body>
-    <h1>Hello World :)</h1>
+<body class="bg-black overflow-hidden">
+    <div class="scene-1 h-screen w-screen">
+        <img src="assets/train-backdrop.png" class="h-full w-full">
+        <img src="assets/train.png" class="absolute right-[-550px] bottom-[-87px] h-150 cover train">
+    </div>
+    <div class="scene-2 h-screen w-screen" style="display:none;">
+        <img src="assets/train-inside.png" class="h-full w-full">
+    </div>
+    <style>
+
+    .font {
+        font-family: 'Press Start 2P', cursive;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .blink {
+      animation: blink 1s steps(1) infinite;
+    }
+  </style>
+    <style>
+        
+        .train {
+            animation: train 6s linear;
+        }
+
+        .fadeOut {
+            animation: fadeOut 2s forwards;
+        }
+        .fadeIn {
+            animation: fadeIn 2s forwards;
+        }
+
+        @keyframes fadeOut{
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes train {
+            0%{
+                right: -550px;
+            }
+            100%{
+                right: calc(99vw)
+            }
+        }
+
+        @keyframes fadeIn{
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+    <script src="index.js"></script>
 </body>
 </html>
