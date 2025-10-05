@@ -70,10 +70,14 @@ let batmanFrame = 0;
 let batmanFramesLeft = [
   'assets/assets/batman/BatmanLeft1.png',
   'assets/assets/batman/BatmanLeft2.png',
+  'assets/assets/batman/BatmanLeft3.png',
+  'assets/assets/batman/BatmanLeft4.png',
 ];
 let batmanFramesRight = [
   'assets/assets/batman/BatmanRight1.png',
   'assets/assets/batman/BatmanRight2.png',
+  'assets/assets/batman/BatmanRight3.png',
+  'assets/assets/batman/BatmanRight4.png',
 ];
 let batmanLastDir = 'right';
 let jokerHealth = 100;
@@ -89,38 +93,44 @@ let fightFrames = [
 ];
 let fightInProgress = false;
 
+// Add Joker's frame-by-frame animations for movement
+let jokerFrame = 0;
+let jokerFramesLeft = [
+  'assets/assets/joker/JokerLeft1.png',
+  'assets/assets/joker/JokerLeft2.png',
+  'assets/assets/joker/JokerLeft3.png',
+  'assets/assets/joker/JokerLeft4.png',
+];
+let jokerFramesRight = [
+  'assets/assets/joker/JokerRight1.png',
+  'assets/assets/joker/JokerRight2.png',
+  'assets/assets/joker/JokerRight3.png',
+  'assets/assets/joker/JokerRight4.png',
+];
+
 function setBatmanState(state, dir) {
   batmanState = state;
   const batman = document.getElementById('batman');
   if (batman) {
     if (state === 'stand') {
-      if (dir === 'left') {
-        batman.src = batmanFramesLeft[0];
-        batmanLastDir = 'left';
-      } else if (dir === 'right') {
-        batman.src = batmanFramesRight[0];
-        batmanLastDir = 'right';
-      } else {
-        batman.src = batmanLastDir === 'left' ? batmanFramesLeft[0] : batmanFramesRight[0];
-      }
+      batman.src = 'assets/assets/batman/BatmanStill.png';
     } else if (state === 'move') {
-      if (dir === 'left') {
-        batmanFrame = (batmanFrame + 1) % batmanFramesLeft.length;
-        batman.src = batmanFramesLeft[batmanFrame];
-        batmanLastDir = 'left';
-      } else if (dir === 'right') {
-        batmanFrame = (batmanFrame + 1) % batmanFramesRight.length;
-        batman.src = batmanFramesRight[batmanFrame];
-        batmanLastDir = 'right';
-      }
-    } else if (state === 'hit') {
-      batman.src = 'assets/assets/batman/BatmanLeft2.png';
+      setTimeout(() => {
+        if (dir === 'left') {
+          batmanFrame = (batmanFrame + 1) % batmanFramesLeft.length;
+          batman.src = batmanFramesLeft[batmanFrame];
+        } else if (dir === 'right') {
+          batmanFrame = (batmanFrame + 1) % batmanFramesRight.length;
+          batman.src = batmanFramesRight[batmanFrame];
+        }
+      }, 500); // 1/2 second delay
+    } else if (state === 'attack') {
+      batman.src = 'assets/assets/batman/BatmanKick.png';
     }
   }
 }
 
 function setJokerState(state) {
-  jokerState = state;
   const joker = document.getElementById('joker');
   if (joker) {
     if (state === 'stand') {
@@ -178,7 +188,7 @@ function playFightAnimation() {
   let healthStart = jokerHealth;
   let healthEnd = Math.max(0, jokerHealth - 40);
   let healthStep = (healthStart - healthEnd) / fightFrames.length;
-  setJokerState('hit');
+  if (joker) joker.style.display = 'none'; // Hide Joker's image
   function nextFrame() {
     if (frame < fightFrames.length) {
       if (batman) batman.src = fightFrames[frame];
@@ -189,12 +199,11 @@ function playFightAnimation() {
     } else {
       // End of fight animation
       if (batman) batman.src = batmanLastDir === 'left' ? batmanFramesLeft[0] : batmanFramesRight[0];
-      setTimeout(() => setJokerState('stand'), 200);
+      if (joker) joker.style.display = 'block'; // Restore Joker's visibility
       fightInProgress = false;
       if (jokerHealth <= 0) {
         const bar = document.getElementById('joker-health-bar-inner');
         if (bar) bar.style.background = '#444';
-        // Show JokerTiedUp.png
         startScene5();
       }
     }
@@ -231,35 +240,9 @@ function handleFightKeys(e) {
     }, 20);
   } else if (e.key === 's' || e.key === 'S') {
     playFightAnimation();
-  }
-  // Joker controls (Arrow keys)
-  if (e.key === 'ArrowLeft') {
-    jokerX = Math.max(0, jokerX - 2);
-    setJokerState('stand');
-  } else if (e.key === 'ArrowRight') {
-    jokerX = Math.min(80, jokerX + 2);
-    setJokerState('stand');
-  } else if (e.key === 'ArrowUp' && !jokerJumping) {
-    jokerJumping = true;
-    setJokerState('stand');
-    let jumpPeak = 60;
-    let jumpStep = 0;
-    let jumpInterval = setInterval(() => {
-      if (jumpStep < 10) {
-        jokerY += jumpPeak / 10;
-      } else if (jumpStep < 20) {
-        jokerY -= jumpPeak / 10;
-      } else {
-        clearInterval(jumpInterval);
-        jokerY = 0;
-        jokerJumping = false;
-      }
-      updateFighters();
-      jumpStep++;
-    }, 20);
-  } else if (e.key === 'ArrowDown') {
-    setJokerState('hit');
-    setTimeout(() => setJokerState('stand'), 200);
+  } else if (e.key === ' ') {
+    setBatmanState('attack');
+    // Add logic to reduce Joker's health
   }
   updateFighters();
 }
