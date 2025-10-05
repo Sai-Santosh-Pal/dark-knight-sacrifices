@@ -1,147 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-<        #ui {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: #ffd700;
-            font-size: 24px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #ffd700;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        #ui div {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
-
-        #ui span {
-            color: #fff;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 5px 10px;
-            border-radius: 5px;
-            min-width: 60px;
-            text-align: center;
-        }a charset="UTF-8">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batman Bomb Collector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
-            background: #0a0a0a;
-            font-family: 'Arial', sans-serif;
+            background: #000;
+            font-family: 'Press Start 2P', cursive;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100vw;
             height: 100vh;
         }
-
         #gameContainer {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            background: #000;
         }
-
         #canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        #timer {
             position: absolute;
-            top: 20px;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            top: 32px;
             left: 50%;
             transform: translateX(-50%);
-            color: #ffd700;
-            font-size: 48px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
             z-index: 10;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px 40px;
-            border-radius: 10px;
-            border: 2px solid #ffd700;
-            font-weight: bold;
+            display: flex;
+            flex-direction: row;
+            gap: 32px;
         }
-
-        #timer.warning {
-            color: #ff4444;
-            border-color: #ff4444;
-            animation: pulse 1s infinite;
+        #ui > div {
+            background: #223a5e;
+            border: 4px solid #0a192f;
+            box-shadow: 0 0 0 4px #3b82f6, 0 0 0 8px #0a192f;
+            color: #fff;
+            font-size: 14px;
+            padding: 12px 24px;
+            margin: 0 8px;
+            min-width: 160px;
+            text-align: center;
         }
-
-        @keyframes pulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.05); }
+        #timer {
+            position: absolute;
+            top: 32px;
+            right: 32px;
+            background: #223a5e;
+            border: 4px solid #0a192f;
+            box-shadow: 0 0 0 4px #3b82f6, 0 0 0 8px #0a192f;
+            color: #fff;
+            font-size: 20px;
+            padding: 16px 32px;
+            z-index: 10;
+            text-align: center;
         }
-
         #instructions {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #223a5e;
+            border: 4px solid #0a192f;
+            box-shadow: 0 0 0 4px #3b82f6, 0 0 0 8px #0a192f;
             color: #fff;
-            font-size: 18px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            font-size: 14px;
+            padding: 18px 32px;
             z-index: 10;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #ffd700;
+            text-align: center;
         }
-
-        #instructions div {
-            margin: 5px 0;
-            line-height: 1.5;
-        }
-
-        #instructions div strong {
-            color: #ffd700;
-            font-size: 20px;
+        #instructions strong {
+            color: #3b82f6;
+            font-size: 16px;
             display: block;
             margin-bottom: 10px;
         }
-
         #winScreen {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 40px 60px;
-            border-radius: 20px;
-            border: 3px solid #ffd700;
+            background: #223a5e;
+            border: 4px solid #0a192f;
+            box-shadow: 0 0 0 4px #3b82f6, 0 0 0 8px #0a192f;
+            color: #fff;
+            font-size: 20px;
+            padding: 32px 48px;
+            z-index: 100;
             text-align: center;
             display: none;
-            z-index: 100;
         }
-
         #winScreen h1 {
-            color: #ffd700;
-            font-size: 48px;
+            color: #3b82f6;
+            font-size: 24px;
             margin-bottom: 20px;
-            text-shadow: 2px 2px 8px rgba(255, 215, 0, 0.5);
         }
-
         #winScreen p {
             color: #fff;
-            font-size: 24px;
+            font-size: 16px;
+        }
+        .fadeOut {
+            animation: fadeOut 1.5s forwards;
+        }
+        .fadeIn {
+            animation: fadeIn 1.5s forwards;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -149,24 +130,30 @@
     <div id="gameContainer">
         <canvas id="canvas"></canvas>
         <div id="ui">
-            <div>💣 Bombs Collected: <span id="collected">0</span></div>
-            <div>📦 Bombs Placed: <span id="placed">0</span></div>
-            <div>🎯 Holding: <span id="holding">None</span></div>
+            <div>Bombs Collected: <span id="collected">0</span></div>
+            <div>Bombs Placed: <span id="placed">0</span></div>
+            <div>Holding: <span id="holding">None</span></div>
         </div>
         <div id="timer">⏱️ <span id="time">00:00</span></div>
         <div id="instructions">
-            <div><strong>🦇 BATMAN BOMB MISSION</strong></div>
-            <div>WASD - Move Batman</div>
-            <div>P - Pick up bomb (Coach 1)</div>
-            <div>E - Place bomb (Coach 2)</div>
-            <div><strong>Mission: Collect all bombs from Coach 1 and place them in Coach 2!</strong></div>
+            <strong>BATMAN BOMB MISSION</strong>
+            WASD - Move Batman<br>
+            P - Pick up bomb (Coach 1)<br>
+            E - Place bomb (Coach 2)<br>
+            <span style="color: #facc15; display: block; margin-top: 10px;">Mission: Collect all bombs from Coach 1 and place them in Coach 2!</span>
         </div>
         <div id="winScreen">
-            <h1>🦇 MISSION COMPLETE! 🦇</h1>
+            <h1>MISSION COMPLETE!</h1>
             <p id="finalTime"></p>
         </div>
     </div>
-
+    <div id="nextScene" style="display:none; opacity:0; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:200; color:#fff; font-size:32px; justify-content:center; align-items:center; text-align:center;">
+        <div id="choiceGame" style="width:100vw; height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div id="choiceStory" style="max-width:700px; font-size:20px; background:#223a5e; border:4px solid #0a192f; box-shadow:0 0 0 4px #3b82f6,0 0 0 8px #0a192f; padding:32px; margin-bottom:32px; text-align:left;"></div>
+            <div id="choiceButtons" style="display:flex; flex-direction:column; gap:18px; margin-bottom:24px;"></div>
+            <button id="backBtn" style="display:none; font-family:'Press Start 2P',cursive; font-size:16px; background:#0a192f; color:#fff; border:2px solid #3b82f6; padding:10px 24px; cursor:pointer;">⏪ Go Back</button>
+        </div>
+    </div>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -302,8 +289,7 @@
                         game.gameComplete = true;
                         const finalTime = updateTimer();
                         setTimeout(() => {
-                            document.getElementById('finalTime').textContent = `All bombs secured in ${finalTime}!`;
-                            document.getElementById('winScreen').style.display = 'block';
+                            showMissionComplete(finalTime);
                         }, 500);
                     }
                     break;
@@ -495,6 +481,223 @@
         initBombs();
         updateUI();
         gameLoop();
+
+        // Patch the placeBomb logic to use showMissionComplete
+        function showMissionComplete(finalTime) {
+            const winScreen = document.getElementById('winScreen');
+            winScreen.style.display = 'block';
+            winScreen.classList.remove('fadeOut');
+            winScreen.classList.add('fadeIn');
+            document.getElementById('finalTime').textContent = `All bombs secured in ${finalTime}!`;
+            setTimeout(() => {
+                // Fade out everything
+                document.getElementById('gameContainer').classList.add('fadeOut');
+                winScreen.classList.add('fadeOut');
+                setTimeout(() => {
+                    document.getElementById('gameContainer').style.display = 'none';
+                    document.getElementById('nextScene').style.display = 'flex';
+                    setTimeout(() => {
+                        document.getElementById('nextScene').classList.add('fadeIn');
+                    }, 100);
+                }, 1600);
+            }, 1800);
+        }
+        // --- Expanded Gotham-style Choice Game Logic ---
+        const storyNodes = [
+      {
+        text: "Gotham is under siege. The Joker has unleashed chaos, and you must decide your next move. Do you confront the Joker directly or save the citizens?",
+        choices: [
+          { text: "Confront the Joker", next: 1 },
+          { text: "Save the citizens", next: 2 }
+        ]
+      },
+      {
+        text: "You confront the Joker at Ace Chemicals. He has set a trap. Do you disarm the bomb or chase the Joker?",
+        choices: [
+          { text: "Disarm the bomb", next: 3 },
+          { text: "Chase the Joker", next: 4 }
+        ]
+      },
+      {
+        text: "You save the citizens, but the Joker escapes. Gotham is safe for now, but the Joker's plans continue. Do you track him down or prepare for his next move?",
+        choices: [
+          { text: "Track him down", next: 5 },
+          { text: "Prepare for his next move", next: 6 }
+        ]
+      },
+      {
+        text: "You disarm the bomb, saving hundreds of lives. The Joker escapes, but Gotham is grateful. Do you pursue him or regroup?",
+        choices: [
+          { text: "Pursue the Joker", next: 7 },
+          { text: "Regroup", next: 8 }
+        ]
+      },
+      {
+        text: "You chase the Joker, but he leads you into another trap. Gotham suffers heavy losses. Do you go back and change your choice?",
+        choices: [
+          { text: "Go back in time", next: 1 },
+          { text: "Accept the outcome", next: 9 }
+        ]
+      },
+      {
+        text: "You track the Joker to his hideout. He has hostages. Do you rescue them or confront him directly?",
+        choices: [
+          { text: "Rescue the hostages", next: 10 },
+          { text: "Confront the Joker", next: 11 }
+        ]
+      },
+      {
+        text: "You prepare for the Joker's next move, setting traps across Gotham. The Joker is caught off guard, but escapes. Gotham is safer, but the Joker remains a threat. The end.",
+        choices: []
+      },
+      {
+        text: "You pursue the Joker, but he escapes into the sewers. Gotham is left in chaos. Do you go back and change your choice?",
+        choices: [
+          { text: "Go back in time", next: 3 },
+          { text: "Accept the outcome", next: 12 }
+        ]
+      },
+      {
+        text: "You regroup with Commissioner Gordon and plan a city-wide operation. The Joker is cornered, but escapes. Gotham is safer, but the Joker remains a threat. The end.",
+        choices: []
+      },
+      {
+        text: "You accept the outcome, but Gotham mourns. The Joker's chaos leaves scars on the city. The end.",
+        choices: []
+      },
+      {
+        text: "You rescue the hostages, but the Joker escapes. Gotham is grateful, but the Joker's plans continue. Do you go back and change your choice?",
+        choices: [
+          { text: "Go back in time", next: 5 },
+          { text: "Accept the outcome", next: 13 }
+        ]
+      },
+      {
+        text: "You confront the Joker directly. He is captured, but Gotham suffers heavy losses. Do you go back and change your choice?",
+        choices: [
+          { text: "Go back in time", next: 5 },
+          { text: "Accept the outcome", next: 14 }
+        ]
+      },
+      {
+        text: "You accept the outcome, but Gotham mourns. The Joker's chaos leaves scars on the city. The end.",
+        choices: []
+      },
+      {
+        text: "You accept the outcome, but Gotham mourns. The Joker's chaos leaves scars on the city. The end.",
+        choices: []
+      }
+    ];
+    let choiceHistory = [];
+    let currentNode = 0;
+    function renderChoiceNode(nodeIdx) {
+      const node = storyNodes[nodeIdx];
+      document.getElementById('choiceStory').textContent = node.text;
+      const btns = document.getElementById('choiceButtons');
+      btns.innerHTML = '';
+      node.choices.forEach((choice, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = choice.text;
+        btn.style.fontFamily = "'Press Start 2P',cursive";
+        btn.style.fontSize = '16px';
+        btn.style.background = '#0a192f';
+        btn.style.color = '#fff';
+        btn.style.border = '2px solid #3b82f6';
+        btn.style.padding = '10px 24px';
+        btn.style.cursor = 'pointer';
+        btn.onclick = () => {
+          choiceHistory.push(nodeIdx);
+          currentNode = choice.next;
+          renderChoiceNode(currentNode);
+          document.getElementById('backBtn').style.display = choiceHistory.length > 0 ? 'inline-block' : 'none';
+        };
+        btns.appendChild(btn);
+      });
+      document.getElementById('backBtn').style.display = choiceHistory.length > 0 ? 'inline-block' : 'none';
+    }
+    document.getElementById('backBtn').onclick = function() {
+      if (choiceHistory.length > 0) {
+        currentNode = choiceHistory.pop();
+        renderChoiceNode(currentNode);
+      }
+      this.style.display = choiceHistory.length > 0 ? 'inline-block' : 'none';
+    };
+    // When nextScene is shown, start the choice game
+    const observer = new MutationObserver(() => {
+      if (document.getElementById('nextScene').style.display === 'flex') {
+        choiceHistory = [];
+        currentNode = 0;
+        renderChoiceNode(0);
+      }
+    });
+    observer.observe(document.getElementById('nextScene'), { attributes: true, attributeFilter: ['style'] });
+    // --- Tree Node Animation After Decisions ---
+    function showDecisionTree() {
+      const treeContainer = document.createElement('div');
+      treeContainer.id = 'decision-tree';
+      treeContainer.style.position = 'fixed';
+      treeContainer.style.top = '50%';
+      treeContainer.style.left = '50%';
+      treeContainer.style.transform = 'translate(-50%, -50%)';
+      treeContainer.style.zIndex = '1000';
+      treeContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+      treeContainer.style.color = 'white';
+      treeContainer.style.padding = '20px';
+      treeContainer.style.borderRadius = '10px';
+      treeContainer.style.overflow = 'auto';
+      treeContainer.style.maxHeight = '80%';
+      treeContainer.style.maxWidth = '80%';
+
+      const treeTitle = document.createElement('h2');
+      treeTitle.innerText = 'Your Decision Path';
+      treeTitle.style.textAlign = 'center';
+      treeContainer.appendChild(treeTitle);
+
+      const treeList = document.createElement('ul');
+      treeList.style.listStyle = 'none';
+      treeList.style.padding = '0';
+
+      let currentNode = 0;
+      while (storyNodes[currentNode] && storyNodes[currentNode].choices.length > 0) {
+        const listItem = document.createElement('li');
+        listItem.innerText = storyNodes[currentNode].text;
+        listItem.style.margin = '10px 0';
+        treeList.appendChild(listItem);
+
+        // Assuming the first choice was always taken for simplicity
+        currentNode = storyNodes[currentNode].choices[0].next;
+      }
+
+      treeContainer.appendChild(treeList);
+
+      const closeButton = document.createElement('button');
+      closeButton.innerText = 'Close';
+      closeButton.style.display = 'block';
+      closeButton.style.margin = '20px auto 0';
+      closeButton.style.padding = '10px 20px';
+      closeButton.style.backgroundColor = '#444';
+      closeButton.style.color = 'white';
+      closeButton.style.border = 'none';
+      closeButton.style.borderRadius = '5px';
+      closeButton.style.cursor = 'pointer';
+
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(treeContainer);
+      });
+
+      treeContainer.appendChild(closeButton);
+      document.body.appendChild(treeContainer);
+    }
+
+    // Call this function after all decisions are made
+    function onGameEnd() {
+      showDecisionTree();
+    }
+
+    // Example trigger for the end of the game
+    // Replace this with the actual game-ending logic
+    setTimeout(onGameEnd, 5000); // Trigger after 5 seconds for demonstration
+
     </script>
 </body>
 </html>
