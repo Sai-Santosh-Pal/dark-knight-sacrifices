@@ -54,6 +54,23 @@ body.addEventListener("keypress", function (event) {
         scene4.classList.add('fadeIn');
         currentScene = 4;
       });
+    } else if (currentScene === 5) {
+      const scene5 = document.querySelector('.scene-5');
+      const scene6 = document.querySelector('.scene-6');
+
+      scene5.classList.remove('fadeIn', 'fadeOut');
+      scene6.classList.remove('fadeIn', 'fadeOut');
+
+      scene5.classList.add('fadeOut');
+      scene5.addEventListener('animationend', function handler5() {
+        scene5.removeEventListener('animationend', handler5);
+        scene5.style.display = 'none';
+
+        scene6.style.display = 'block';
+        scene6.classList.add('fadeIn');
+        currentScene = 6;
+        startScene6();
+      });
     }
 }});
 
@@ -247,3 +264,160 @@ function handleFightKeys(e) {
   updateFighters();
 }
 document.addEventListener('keydown', handleFightKeys);
+
+
+// Function to initialize Scene 6
+function startScene6() {
+  currentCoach = 1;
+  scene6BatmanX = 50;
+  scene6BatmanY = 50;
+  bombsCarrying = [];
+  bombsPlaced = 0;
+  bombs.forEach(bomb => {
+    bomb.picked = false;
+    bomb.placed = false;
+  });
+  updateScene6BatmanPosition();
+  updateScene6Bombs();
+  updateCoachIndicator();
+}
+
+// Scene 6 logic for Batman to pick and place bombs (Hunter Assassin style)
+let currentCoach = 1; // 1 for first coach, 2 for last coach
+let scene6BatmanX = 50; // pixels from left
+let scene6BatmanY = 50; // pixels from bottom
+let bombs = [
+  { x: 200, y: 300, picked: false, placed: false },
+  { x: 500, y: 400, picked: false, placed: false },
+  { x: 350, y: 200, picked: false, placed: false },
+];
+let bombsCarrying = [];
+let bombsPlaced = 0;
+
+function updateScene6BatmanPosition() {
+  const batman = currentCoach === 1 
+    ? document.getElementById('batman-scene6')
+    : document.getElementById('batman-scene6-coach2');
+  if (batman) {
+    batman.style.left = scene6BatmanX + 'px';
+    batman.style.bottom = scene6BatmanY + 'px';
+  }
+}
+
+function updateScene6Bombs() {
+  bombs.forEach((bomb, index) => {
+    const bombElement = document.getElementById(`bomb-${index}`);
+    if (bombElement) {
+      if (bomb.picked || bomb.placed) {
+        bombElement.style.display = 'none';
+      } else {
+        bombElement.style.display = 'block';
+        bombElement.style.left = bomb.x + 'px';
+        bombElement.style.bottom = bomb.y + 'px';
+      }
+    }
+  });
+  
+  // Update UI
+  const bombCounter = document.getElementById('bomb-counter');
+  if (bombCounter) {
+    bombCounter.textContent = `Bombs Placed: ${bombsPlaced}/3`;
+  }
+}
+
+function updateCoachIndicator() {
+  const indicator = document.getElementById('coach-indicator');
+  if (indicator) {
+    indicator.textContent = `Coach ${currentCoach}/2`;
+  }
+}
+
+function handleScene6Keys(e) {
+  if (currentScene !== 6) return;
+
+  // Movement logic (Hunter Assassin style - smaller movements)
+  const moveSpeed = 15;
+  if (e.key === 'w' || e.key === 'W') {
+    scene6BatmanY = Math.min(window.innerHeight - 120, scene6BatmanY + moveSpeed);
+  } else if (e.key === 's' || e.key === 'S') {
+    scene6BatmanY = Math.max(20, scene6BatmanY - moveSpeed);
+  } else if (e.key === 'a' || e.key === 'A') {
+    scene6BatmanX = Math.max(20, scene6BatmanX - moveSpeed);
+  } else if (e.key === 'd' || e.key === 'D') {
+    scene6BatmanX = Math.min(window.innerWidth - 100, scene6BatmanX + moveSpeed);
+  }
+
+  // Pick bomb (only in coach 1)
+  if ((e.key === 'p' || e.key === 'P') && currentCoach === 1) {
+    bombs.forEach((bomb, index) => {
+      if (!bomb.picked && !bomb.placed) {
+        const distance = Math.sqrt(
+          Math.pow(scene6BatmanX - bomb.x, 2) + 
+          Math.pow(scene6BatmanY - bomb.y, 2)
+        );
+        if (distance < 60) {
+          bomb.picked = true;
+          bombsCarrying.push(index);
+        }
+      }
+    });
+  }
+
+  // Place bomb (only in coach 2 and in drop zone)
+  if ((e.key === 'e' || e.key === 'E') && currentCoach === 2 && bombsCarrying.length > 0) {
+    // Check if Batman is in the drop zone (right side of coach 2)
+    const dropZoneX = window.innerWidth * 0.7;
+    const dropZoneY = window.innerHeight * 0.2;
+    const dropZoneWidth = window.innerWidth * 0.2;
+    const dropZoneHeight = window.innerHeight * 0.3;
+    
+    if (scene6BatmanX >= dropZoneX && scene6BatmanX <= dropZoneX + dropZoneWidth &&
+        scene6BatmanY >= dropZoneY && scene6BatmanY <= dropZoneY + dropZoneHeight) {
+      const bombIndex = bombsCarrying.pop();
+      bombs[bombIndex].placed = true;
+      bombsPlaced++;
+      
+      if (bombsPlaced === 3) {
+        setTimeout(() => {
+          alert('Mission Complete! All bombs placed!');
+        }, 500);
+      }
+    }
+  }
+
+  // Switch coach with TAB
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    switchCoach();
+  }
+
+  updateScene6BatmanPosition();
+  updateScene6Bombs();
+}
+
+function switchCoach() {
+  const coach1 = document.querySelector('.coach-1');
+  const coach2 = document.querySelector('.coach-2');
+
+  if (currentCoach === 1) {
+    coach1.style.display = 'none';
+    coach2.style.display = 'block';
+    currentCoach = 2;
+    // Reset Batman position when switching
+    scene6BatmanX = 50;
+    scene6BatmanY = 50;
+  } else {
+    coach2.style.display = 'none';
+    coach1.style.display = 'block';
+    currentCoach = 1;
+    // Reset Batman position when switching
+    scene6BatmanX = 50;
+    scene6BatmanY = 50;
+  }
+  
+  updateCoachIndicator();
+  updateScene6BatmanPosition();
+  updateScene6Bombs();
+}
+
+document.addEventListener('keydown', handleScene6Keys);

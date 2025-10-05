@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<        #ui {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ffd700;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #ui div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #ui span {
+            color: #fff;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 5px;
+            min-width: 60px;
+            text-align: center;
+        }a charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batman Bomb Collector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #timer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 48px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            font-weight: bold;
+        }
+
+        #timer.warning {
+            color: #ff4444;
+            border-color: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+        }
+
+        #instructions div {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+
+        #instructions div strong {
+            color: #ffd700;
+            font-size: 20px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #winScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px 60px;
+            border-radius: 20px;
+            border: 3px solid #ffd700;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        #winScreen h1 {
+            color: #ffd700;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(255, 215, 0, 0.5);
+        }
+
+        #winScreen p {
+            color: #fff;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="canvas"></canvas>
+        <div id="ui">
+            <div>💣 Bombs Collected: <span id="collected">0</span></div>
+            <div>📦 Bombs Placed: <span id="placed">0</span></div>
+            <div>🎯 Holding: <span id="holding">None</span></div>
+        </div>
+        <div id="timer">⏱️ <span id="time">00:00</span></div>
+        <div id="instructions">
+            <div><strong>🦇 BATMAN BOMB MISSION</strong></div>
+            <div>WASD - Move Batman</div>
+            <div>P - Pick up bomb (Coach 1)</div>
+            <div>E - Place bomb (Coach 2)</div>
+            <div><strong>Mission: Collect all bombs from Coach 1 and place them in Coach 2!</strong></div>
+        </div>
+        <div id="winScreen">
+            <h1>🦇 MISSION COMPLETE! 🦇</h1>
+            <p id="finalTime"></p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Game state
+        // Image paths
+        const IMAGES = {
+            bomb: 'Bomb.png'
+        };
+
+        // Load images
+        const images = {};
+        let imagesLoaded = 0;
+        let totalImages = 0;
+
+        function loadImages() {
+            totalImages = Object.keys(IMAGES).length;
+            
+            for (let key in IMAGES) {
+                images[key] = new Image();
+                images[key].onload = () => {
+                    imagesLoaded++;
+                };
+                images[key].onerror = () => {
+                    console.error(`Failed to load image: ${IMAGES[key]}`);
+                    imagesLoaded++;
+                };
+                images[key].src = IMAGES[key];
+            }
+        }
+
+        const game = {
+            batman: {
+                x: 100,
+                y: canvas.height / 2,
+                size: 30,
+                speed: 5,
+                holdingBomb: false
+            },
+            coaches: [
+                { x: 50, y: canvas.height / 2 - 150, width: 600, height: 300, color: '#2c3e50', label: 'COACH 1' },
+                { x: canvas.width - 650, y: canvas.height / 2 - 150, width: 600, height: 300, color: '#34495e', label: 'COACH 2' }
+            ],
+            bombs: [],
+            totalBombs: 8,
+            bombsCollected: 0,
+            bombsPlaced: 0,
+            keys: {},
+            startTime: Date.now(),
+            gameComplete: false
+        };
+
+        // Initialize bombs in Coach 1
+        function initBombs() {
+            const coach = game.coaches[0];
+            for (let i = 0; i < game.totalBombs; i++) {
+                game.bombs.push({
+                    x: coach.x + 50 + Math.random() * (coach.width - 100),
+                    y: coach.y + 50 + Math.random() * (coach.height - 100),
+                    size: 25,
+                    collected: false,
+                    placed: false
+                });
+            }
+        }
+
+        // Input handling
+        window.addEventListener('keydown', (e) => {
+            game.keys[e.key.toLowerCase()] = true;
+            
+            if (e.key.toLowerCase() === 'p') {
+                pickUpBomb();
+            }
+            if (e.key.toLowerCase() === 'e') {
+                placeBomb();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            game.keys[e.key.toLowerCase()] = false;
+        });
+
+        // Pick up bomb
+        function pickUpBomb() {
+            if (game.batman.holdingBomb) return;
+            
+            const coach1 = game.coaches[0];
+            const inCoach1 = isInCoach(game.batman, coach1);
+            
+            if (!inCoach1) return;
+
+            for (let bomb of game.bombs) {
+                if (!bomb.collected && !bomb.placed) {
+                    const dist = Math.hypot(game.batman.x - bomb.x, game.batman.y - bomb.y);
+                    if (dist < 50) {
+                        bomb.collected = true;
+                        game.batman.holdingBomb = true;
+                        game.bombsCollected++;
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Place bomb
+        function placeBomb() {
+            if (!game.batman.holdingBomb) return;
+            
+            const coach2 = game.coaches[1];
+            const inCoach2 = isInCoach(game.batman, coach2);
+            
+            if (!inCoach2) return;
+
+            for (let bomb of game.bombs) {
+                if (bomb.collected && !bomb.placed) {
+                    bomb.placed = true;
+                    bomb.x = game.batman.x;
+                    bomb.y = game.batman.y;
+                    game.batman.holdingBomb = false;
+                    game.bombsPlaced++;
+                    updateUI();
+                    
+                    if (game.bombsPlaced === game.totalBombs) {
+                        game.gameComplete = true;
+                        const finalTime = updateTimer();
+                        setTimeout(() => {
+                            document.getElementById('finalTime').textContent = `All bombs secured in ${finalTime}!`;
+                            document.getElementById('winScreen').style.display = 'block';
+                        }, 500);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Check if Batman is in a coach
+        function isInCoach(batman, coach) {
+            return batman.x > coach.x && 
+                   batman.x < coach.x + coach.width && 
+                   batman.y > coach.y && 
+                   batman.y < coach.y + coach.height;
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('collected').textContent = game.bombsCollected;
+            document.getElementById('placed').textContent = game.bombsPlaced;
+            document.getElementById('holding').textContent = game.batman.holdingBomb ? '💣 BOMB' : 'None';
+        }
+
+        // Update timer
+        function updateTimer() {
+            if (game.gameComplete) return;
+            
+            const elapsed = Date.now() - game.startTime;
+            const seconds = Math.floor(elapsed / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const displaySeconds = seconds % 60;
+            
+            const timeString = `${String(minutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`;
+            document.getElementById('time').textContent = timeString;
+            
+            return timeString;
+        }
+
+        // Update game
+        function update() {
+            // Move Batman
+            if (game.keys['w']) game.batman.y -= game.batman.speed;
+            if (game.keys['s']) game.batman.y += game.batman.speed;
+            if (game.keys['a']) game.batman.x -= game.batman.speed;
+            if (game.keys['d']) game.batman.x += game.batman.speed;
+
+            // Keep Batman in bounds
+            game.batman.x = Math.max(0, Math.min(canvas.width - game.batman.size, game.batman.x));
+            game.batman.y = Math.max(0, Math.min(canvas.height - game.batman.size, game.batman.y));
+        }
+
+        // Draw game
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connection between coaches
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(game.coaches[0].x + game.coaches[0].width, game.coaches[0].y + game.coaches[0].height / 2);
+            ctx.lineTo(game.coaches[1].x, game.coaches[1].y + game.coaches[1].height / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw coaches
+            for (let coach of game.coaches) {
+                // Coach body
+                ctx.fillStyle = coach.color;
+                ctx.fillRect(coach.x, coach.y, coach.width, coach.height);
+                
+                // Coach border
+                ctx.strokeStyle = '#ecf0f1';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(coach.x, coach.y, coach.width, coach.height);
+
+                // Coach windows
+                for (let i = 0; i < 4; i++) {
+                    ctx.fillStyle = '#1a1a2e';
+                    ctx.fillRect(coach.x + 50 + i * 130, coach.y + 30, 80, 60);
+                    ctx.strokeStyle = '#ecf0f1';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(coach.x + 50 + i * 130, coach.y + 30, 80, 60);
+                }
+
+                // Coach label
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(coach.label, coach.x + coach.width / 2, coach.y + coach.height - 20);
+            }
+
+            // Draw bombs
+            for (let bomb of game.bombs) {
+                if (!bomb.collected || bomb.placed) {
+                    // Draw bomb image if loaded, otherwise draw fallback
+                    if (images.bomb && images.bomb.complete) {
+                        ctx.drawImage(images.bomb, bomb.x - bomb.size, bomb.y - bomb.size, bomb.size * 2, bomb.size * 2);
+                    } else {
+                        // Fallback bomb rendering
+                        ctx.fillStyle = '#2c2c2c';
+                        ctx.beginPath();
+                        ctx.arc(bomb.x, bomb.y, bomb.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.fillStyle = '#ff0000';
+                        ctx.beginPath();
+                        ctx.arc(bomb.x, bomb.y, bomb.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.moveTo(bomb.x, bomb.y - bomb.size);
+                        ctx.lineTo(bomb.x - 5, bomb.y - bomb.size - 10);
+                        ctx.stroke();
+                        
+                        ctx.fillStyle = '#ffff00';
+                        ctx.beginPath();
+                        ctx.arc(bomb.x - 5, bomb.y - bomb.size - 10, 3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 20px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('💣', bomb.x, bomb.y + 8);
+                    }
+                }
+            }
+
+            // Draw Batman
+            ctx.save();
+            ctx.translate(game.batman.x + game.batman.size / 2, game.batman.y + game.batman.size / 2);
+            
+            // Batman cape
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(0, 0, game.batman.size * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Batman body
+            ctx.fillStyle = '#2c3e50';
+            ctx.beginPath();
+            ctx.arc(0, 0, game.batman.size * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Batman symbol
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🦇', 0, 8);
+
+            ctx.restore();
+
+            // Draw held bomb
+            if (game.batman.holdingBomb) {
+                // Draw bomb image if loaded, otherwise draw fallback
+                const heldX = game.batman.x + game.batman.size + 15;
+                const heldY = game.batman.y - 10;
+                const heldSize = 15;
+                
+                if (images.bomb && images.bomb.complete) {
+                    ctx.drawImage(images.bomb, heldX - heldSize, heldY - heldSize, heldSize * 2, heldSize * 2);
+                } else {
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    ctx.arc(heldX, heldY, heldSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💣', heldX, heldY + 5);
+                }
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            updateTimer();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize and start
+        loadImages();
+        initBombs();
+        updateUI();
+        gameLoop();
+    </script>
+</body>
+</html>
